@@ -13,6 +13,8 @@ SpaceRocks.StartMenu.prototype = {
         this.control.onDown.add(this.startGame, this);
         
 		this.startBG = this.add.image(0, 0, 'titlescreen');
+		this.startBG.height = this.world.height;
+		this.startBG.width = this.world.width; 
 		this.startBG.inputEnabled = true;
 		this.startBG.events.onInputDown.addOnce(this.startGame, this);
 		this.instr = 'Use Space to fire and Alt for Hyperspace';
@@ -21,6 +23,8 @@ SpaceRocks.StartMenu.prototype = {
 	},
 
 	startGame: function (pointer) {
+		//console.log('this.world.width == ' + this.world.width);
+        //console.log('this.world.height == ' + this.world.height);
 		this.state.start('Game');
 	},
 };

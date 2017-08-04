@@ -23,7 +23,10 @@ SpaceRocks.Preloader.prototype = {
 		this.load.audio('boom3', 'audio/boom3.mp3');
 		this.load.audio('boop1', 'audio/boop1.mp3');
 		this.load.audio('boop2', 'audio/boop2.mp3');
+		this.load.audio('beep',  'audio/beep.mp3');
+		this.load.audio('brr',   'audio/brr.mp3');
 		this.load.audio('bweeoop', 'audio/bweeoop.mp3');
+		this.load.audio('deedeedee', 'audio/deedeedee.mp3');
 	},
 
 	create: function () {

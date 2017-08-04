@@ -8,6 +8,7 @@
 	<script src="Preloader.js"></script>
 	<script src="StartMenu.js"></script>
 	<script src="Game.js"></script>
+	<script src="HighScores.js"></script>
 	<style>
 		body {
 			padding: 0;
@@ -20,13 +21,14 @@
 	<div id="gameContainer"></div>
 	<script type="text/javascript">
 		window.onload = function() {
-			var game = new Phaser.Game(960, 540, Phaser.AUTO, 'gameContainer');
+			var game = new Phaser.Game('100', '100', Phaser.AUTO, 'gameContainer');
 			game.state.add('Boot', SpaceRocks.Boot);
 			game.state.add('Preloader', SpaceRocks.Preloader);
 			game.state.add('StartMenu', SpaceRocks.StartMenu);
 			game.state.add('Game', SpaceRocks.Game);
+			game.state.add('HighScores', SpaceRocks.HighScores);
 			game.state.start('Boot');
-		}
+		};
 	</script>
 </body>
 </html>

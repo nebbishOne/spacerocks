@@ -10,14 +10,20 @@ SpaceRocks.Game = function(game) {
     this.firerate;
     this.nextfire;
     this.burst;
+    this.enemyBurst;
     this.enemy;
     this.enemyTimer;
+    this.enemyShots;
+    this.enemyShotTimer;
+    this.beep;
     this.boom1;
     this.boom2;
     this.boom3;
     this.boop1;
     this.boop2;
+    this.brr;
     this.bweeoop;
+    this.deedeedee;
     this.cursors;
     this.control;
     this.hyperspace;
@@ -45,9 +51,12 @@ SpaceRocks.Game.prototype = {
         this.gameover = false;
         this.timer = 0;
         this.asteroidTimer = null;
-        this.playerRespawnTime = 2500;
         this.startAsteroids = 5;
         this.asteroidCount = 0;
+        this.enemy = null;
+        this.enemyTimer = null;
+        this.enemyShotTimer = null;
+        this.playerRespawnTime = 2500;
         this.firerate = 200;
         this.shiprate = 50;
         this.maxshiprate = 20;
@@ -57,25 +66,32 @@ SpaceRocks.Game.prototype = {
         this.canhyperspace = true;
         this.haveRocks = false;
         
+        this.beep =  this.add.audio('beep');
         this.boom1 = this.add.audio('boom1');
         this.boom2 = this.add.audio('boom2');
         this.boom3 = this.add.audio('boom3');
         this.boop1 = this.add.audio('boop1');
         this.boop2 = this.add.audio('boop2');
-        this.bweeoop = this.add.audio('bweeoop');
+        this.brr =   this.add.audio('brr');
+        this.bweeoop =   this.add.audio('bweeoop');
+        this.deedeedee = this.add.audio('deedeedee');
         
         this.buildWorld();
     },
     
     buildWorld: function () {
-        this.bg = this.add.sprite(0, 0, 'bg');
+        this.bg = this.add.image(0, 0, 'bg');
+        this.bg.height = this.world.height;
+        this.bg.width = this.world.width; 
         this.bg.z = 0;
         this.buildShip();
         this.buildEnemy();
         this.buildAsteroids();
         this.buildShots();
+        this.buildEnemyShots();
         this.buildEmitter();
-        this.scoremessage = this.add.bitmapText(this.world.width-150,10, 'eightbitwonder', 'Score:' + this.score, 20);
+        this.buildEnemyEmitter();
+        this.scoremessage = this.add.bitmapText(this.world.width-200,10, 'eightbitwonder', 'Score:' + this.score, 20);
         this.lifemessage = this.add.bitmapText(10, 10, 'eightbitwonder', 'Lives: ' + this.lives, 20);
         
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -92,17 +108,6 @@ SpaceRocks.Game.prototype = {
         this.ship.enableBody = true;
         this.ship.allowRotation = true;
         this.ship.anchor.setTo(0.5, 0.5);
-    },
-    
-    buildEnemy: function() {
-        this.enemy = this.add.sprite(this.rnd.integerInRange(0,this.world.centerX), this.rnd.integerInRange(0,this.world.centerY), 'enemy');
-        this.enemy.enableBody = true;
-        this.enemy.allowRotation = false;
-        this.enemy.anchor.setTo(0.5, 0.5);
-        this.add.tween(this.enemy).to( {x: 400}, 5000);
-        //this.enemy.kill();
-        //this.enemy.exists = false;
-        this.bweeoop.play();
     },
     
     buildShots: function() {
@@ -166,6 +171,15 @@ SpaceRocks.Game.prototype = {
         this.burst.makeParticles('explosion');
     },
     
+    buildEnemyEmitter:function() {
+        this.enemyBurst = this.add.emitter(0, 0, 30);
+        this.enemyBurst.minParticleScale = 0.1;
+        this.enemyBurst.maxParticleScale = 0.5;
+        this.enemyBurst.minParticleSpeed.setTo(-90, 90);
+        this.enemyBurst.maxParticleSpeed.setTo(90, -90);
+        this.enemyBurst.makeParticles('explosion');
+    },
+    
     fireBurst: function(a, s) {
         if (this.gameover == false) {
             //play sound
@@ -183,6 +197,7 @@ SpaceRocks.Game.prototype = {
             
             this.score++;
             this.scoremessage.setText('Score: ' + this.score);
+            this.checkScore();
             
             if (a.exists) {
                 if (a.custSize == 'large') {
@@ -204,7 +219,7 @@ SpaceRocks.Game.prototype = {
             this.createOneLargeAsteroid();
         }
         this.haveRocks = true;
-        console.log("haveRocks=" + this.haveRocks);
+        //console.log("haveRocks=" + this.haveRocks);
     },
     
     respawnAsteroid: function(a) {
@@ -402,56 +417,231 @@ SpaceRocks.Game.prototype = {
                 if (alive == 0) {
                     this.asteroidTimer = this.time.now + 5000;
                     this.haveRocks = false;
-                    console.log("haveRocks=" + this.haveRocks);
+                    //console.log("haveRocks=" + this.haveRocks);
                 }
             }
         }
     },
     
+    buildEnemy: function() {
+        this.enemy = this.add.sprite(this.rnd.integerInRange(0,this.world.centerX), this.rnd.integerInRange(0,this.world.centerY), 'enemy');
+        //this.enemy.physicsBodyType = Phaser.Physics.ARCADE;
+        this.physics.enable(this.enemy, Phaser.Physics.ARCADE);
+        this.enemy.enable = true;
+        //this.enemy.allowRotation = false;
+        this.enemy.anchor.setTo(0.5, 0.5);
+        this.enemy.kill();
+        this.enemy.exists = false;
+        this.enemyTimer = null;
+    },
+    
     checkForEnemy: function(game) {
         if (this.enemy.exists == false) {
             if (this.enemyTimer == null) {
-                this.enemyTimer = this.time.now + this.rnd.integerInRange(2000,5000);
-                console.log("Setting enemy timer");
+                this.enemyTimer = this.time.now + this.rnd.integerInRange(10000,15000);
+                console.log("Setting enemy timer to " + this.enemyTimer);
             }
         }    
     },
     
     rebuildEnemy: function() {
-        if (this.enemy.exists == false) {
-            this.enemy.reset(this.rnd.integerInRange(0,this.world.width), this.rnd.integerInRange(0,this.world.height));
-            this.enemy.enableBody = true;
-            this.enemy.allowRotation = false;
-            this.enemy.anchor.setTo(0.5, 0.5);
-            this.add.tween(this.enemy).to( {x: 400}, 5000);
-            console.log("Enemy tweened!");
+        if (this.gameover == false) {
+            if (this.enemy.exists == false) {
+                var x1 = 50;
+                var y1 = 50;
+                var x2 = this.world.width - 50;
+                var y2 = this.world.height - 50;
+                var pick = this.rnd.integerInRange(1,4);
+                if (pick == 1) {
+                    this.enemy.reset(x1, y1);
+                } else if (pick == 2) {
+                    this.enemy.reset(x1, y2);
+                } else if (pick == 3) {
+                    this.enemy.reset(x2, y1);
+                } else {
+                    this.enemy.reset(x2, y2);
+                }
+                this.makeEnemyMove();
+            }
         }
     },
     
+    makeEnemyMove: function() {
+        if (this.enemy.exists == true) {
+            if (this.enemy.body) {
+                this.enemy.body.acceleration.set(100);
+                this.physics.arcade.accelerateToXY(
+                    this.enemy, //displayobject
+                    this.rnd.integerInRange(0,this.world.height-50),  // y, 
+                    100,                                              //speed, 
+                    100,                                              //xSpeedMax, 
+                    100);                                             //ySpeedMax) 
+                
+                //console.log("Enemy moving!");
+                
+                this.bweeoop.loopFull();
+            }
+        }
+    },
     
+    enemyExplode: function() {
+        if (this.gameover == false) {
+            if (this.enemy.exists == true) {
+                this.bweeoop.stop();
+                this.boom3.play();
+                
+                this.enemyBurst.emitX = this.enemy.x;
+                this.enemyBurst.emitY = this.enemy.y;
+                this.enemyBurst.start(true, 800, null, 30); //(explode, lifespan, frequency, quantity)
+                
+                this.enemy.kill();
+                this.checkForEnemy();
+                this.score = this.score + 10;
+                this.scoremessage.setText('Score: ' + this.score);
+            }
+        }  
+    },
     
-    //burstCollision: function(a, b) {
-        //this.respawnAsteroid(a);
-        //this.goLargeToMedium(a);
-    //},
+    buildEnemyShots: function() {
+        this.enemyShots = this.add.group();
+        this.enemyShots.physicsBodyType = Phaser.Physics.ARCADE;
+        this.enemyShots.enableBody = true;
+        this.enemyShots.createMultiple(20, 'shot');
+        this.enemyShots.setAll('checkWorldBounds', true);
+        this.enemyShots.setAll('outOfBoundsKill', true);
+    },
+    
+    checkEnemyShot: function() {
+        if (this.gameover == false) {
+            if (this.enemy.exists == true && this.enemyShotTimer == null) {
+                this.enemyShotTimer = this.time.now + 1500;
+            }
+        }  
+    },
+    
+    fireEnemyShot: function() {
+        if (this.gameover == false) {
+            if (this.ship.exists && this.enemy.exists) {
+                if (this.enemyShots.countDead() > 0)
+                {
+                    var eShot = this.enemyShots.getFirstDead();
+            
+                    eShot.reset(this.enemy.x, this.enemy.y);
+                    //accelerateToObject(displayObject, destination, speed, xSpeedMax, ySpeedMax) 
+                    this.physics.arcade.accelerateToObject(eShot, this.ship, 150, 150, 150);
+                    this.playRndSound('beep');
+                }
+            }
+        }
+    },
+    
+    shipExplode: function(s, a) {
+        if (this.gameover == false) {
+            this.boom3.play();
+            
+            //erase the ship
+            if (this.ship.exists) {
+                //erase the asteroid
+                if (a) {
+                    this.respawnAsteroid(a);
+                }
+    
+                this.burst.emitX = s.x;
+                this.burst.emitY = s.y;
+                this.burst.start(true, 800, null, 30); //(explode, lifespan, frequency, quantity)
+                
+                this.canhyperspace = true;
+                this.ship.kill();
+                //console.log("killed my ship");
+                this.lives--;
+                if (this.lives < 1) {
+                    this.endGame();
+                } else { 
+                    this.lifemessage.setText('Lives: ' + this.lives);
+                    this.timer = this.time.now + this.playerRespawnTime;
+                    //console.log("this.timer is " + this.timer);
+                }
+            }
+        }
+    },
+    
+    screenWrapEnemy: function() {
+        if (this.enemy.x < 0 || this.enemy.x > this.game.width) {
+            this.bweeoop.stop();
+            this.enemy.kill();
+        }
+    
+        if (this.enemy.y < 0 || this.enemy.y > this.game.height) {
+            this.bweeoop.stop();
+            this.enemy.kill();
+        }
+    },
+    
+    enemyShipExplode: function(es, s) {
+        // when an enemy shot hits my ship
+        if (this.gameover == false) {
+            //erase all shots
+            this.enemyShots.forEachExists(
+                function(eShot) {
+                    eShot.kill();
+                }, this);
+            
+            // kill my ship
+            if (this.ship.exists == true) {
+                this.bweeoop.stop();
+                //console.log("making ship explode");
+                this.shipExplode(s, null);
+            }
+        }
+    },
+    
+    checkScore: function() {
+        if (this.gameover == false) {
+            if (this.score != 0 && this.score % 50 == 0) {
+                this.deedeedee.play();
+                this.lives++;
+                this.lifemessage.setText('Lives: ' + this.lives);
+            }  
+        }
+    },
     
     endGame: function() {
         this.gameover = true;
-        this.lifemessage.setText("Lives: 0");
-        this.overmessage = this.add.bitmapText(this.world.centerX-170, this.world.centerY-80, 'eightbitwonder', 'Game Over', 36);
-        this.overmessage = this.add.bitmapText(this.world.centerX-90, this.world.centerY, 'eightbitwonder', 'Score: ' + this.score, 26);
-        this.overmessage = this.add.bitmapText(this.world.centerX-130, this.world.centerY+80, 'eightbitwonder', 'Press Space to \n\nPlay Again', 20);
-        this.overmessage.align = 'center';
-        this.overmessage.inputEnabled = true;
-        this.overmessage.events.onInputDown.addOnce(this.quitGame, this);
+        this.ship.kill();
+        this.enemy.kill();
+        this.shots.forEachExists(
+                function(shot) {
+                    shot.kill();
+                }, this);
+        this.enemyShots.forEachExists(
+                function(eShot) {
+                    eShot.kill();
+                }, this);
+        this.asteroidsgroup.forEachExists(
+                function(a) {
+                    a.kill();
+                }, this);
         
-        this.timer = this.time.now + 3000;
+        this.bweeoop.stop();
+        this.lifemessage.setText("Lives: 0");
+        
+        // remember this score
+        if (this.game.device.localStorage) {
+            localStorage.setItem('newestScore', this.score);
+            console.log("newest score is " + localStorage.getItem('newestScore'));
+        } else { 
+            console.log('!!!!!!!!!! Cannot set high score - no local storage !!!!!!!!!!');   
+        }
+        
+        // game over message
+        this.overmessage = this.add.bitmapText(this.world.centerX-170, this.world.centerY-80, 'eightbitwonder', 'Game Over', 40);
+        
+        this.timer = this.time.now + 5000;
     },
     
     quitGame: function(pointer) {
-        //this.ding.play();
-        this.state.start('StartMenu');
-    },
+        this.state.start('HighScores');
+    },    
     
     doNothing: function() {
         //really.
@@ -459,13 +649,12 @@ SpaceRocks.Game.prototype = {
         
     update: function() {
         if (this.gameover == true && this.timer < this.time.now) {
-            this.control = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-            this.control.onDown.add(this.quitGame, this);
+            this.quitGame();
             this.timer = null;
         }
         
         if (this.gameover == false) {
-            if (!this.ship.exists && this.timer < this.time.now) {
+            if (this.ship.exists == false && this.timer < this.time.now) {
                 this.ship.reset(this.world.centerX, this.world.centerY);
                 this.timer = null;
             }
@@ -482,13 +671,17 @@ SpaceRocks.Game.prototype = {
                 this.asteroidTimer = null;
             }
             
-            /*
             if (this.enemy.exists == false && this.enemyTimer < this.time.now) {
                 console.log("need to rebuild enemy");
                 this.rebuildEnemy();
                 this.enemyTimer = null;
             }
-            */
+            
+            if (this.enemy.exists == true && this.enemyShotTimer < this.time.now) {
+                console.log("enemy takes a shot");
+                this.fireEnemyShot();
+                this.enemyShotTimer = null;
+            }
             
             // keyboard inputs - left, right, up
             if (this.cursors.left.isDown) {
@@ -502,20 +695,28 @@ SpaceRocks.Game.prototype = {
             {
                 var shipspeed = this.ship.velocity > 100 ? this.maxshiprate : this.shiprate;
                 this.physics.arcade.accelerationFromRotation(this.ship.rotation-1.57, shipspeed, this.ship.body.acceleration);
+                if (this.brr.isPlaying == false) {
+                    this.brr.play();
+                }
             } else {
                 if (this.ship && this.ship != undefined) this.ship.body.acceleration.set(0);
+                this.brr.stop();
             }
             
             this.screenWrapMyShip(this);
-            //this.screenWrapShot(this);
+            this.screenWrapEnemy(this);
             this.screenWrapAsteroids(this);
             
             this.checkAsteroidCount(this);
             
             this.checkForEnemy(this);
+            this.checkEnemyShot(this);
             
              // collisions
             this.physics.arcade.overlap(this.ship, this.asteroidsgroup, this.shipExplode, null, this);
+            this.physics.arcade.overlap(this.enemy, this.asteroidsgroup, this.enemyExplode, null, this);
+            this.physics.arcade.overlap(this.enemyShots, this.ship, this.enemyShipExplode, null, this);
+            this.physics.arcade.overlap(this.enemy, this.shots, this.enemyExplode, null, this);
             this.physics.arcade.overlap(this.asteroidsgroup, this.shots, this.fireBurst, null, this);
         }
     }
