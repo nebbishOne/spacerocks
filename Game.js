@@ -32,6 +32,7 @@ SpaceRocks.Game = function(game) {
     this.canhyperspace;
     this.shotFired;
     this.score;
+    this.prevscore;
     this.scoremessage;
     this.lives;
     this.lifemessage;
@@ -48,6 +49,7 @@ SpaceRocks.Game.prototype = {
     create: function() {
         this.lives = 3;
         this.score = 0;
+        this.prevscore = 0;
         this.gameover = false;
         this.timer = 0;
         this.asteroidTimer = null;
@@ -497,6 +499,7 @@ SpaceRocks.Game.prototype = {
                 this.enemy.kill();
                 this.checkForEnemy();
                 this.score = this.score + 10;
+                this.checkScore();
                 this.scoremessage.setText('Score: ' + this.score);
             }
         }  
@@ -597,11 +600,15 @@ SpaceRocks.Game.prototype = {
     
     checkScore: function() {
         if (this.gameover == false) {
-            if (this.score != 0 && this.score % 50 == 0) {
-                this.deedeedee.play();
-                this.lives++;
-                this.lifemessage.setText('Lives: ' + this.lives);
-            }  
+            if (this.score != 0) {
+                if ((this.score < 500 && this.score - this.prevscore > 50) || 
+                    (this.score - this.prevscore > 100))  {
+                    this.deedeedee.play();
+                    this.lives++;
+                    this.lifemessage.setText('Lives: ' + this.lives);
+                    this.prevscore = this.score;
+                }    
+            } 
         }
     },
     
