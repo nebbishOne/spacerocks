@@ -429,7 +429,7 @@ SpaceRocks.Game.prototype = {
         this.enemy = this.add.sprite(this.rnd.integerInRange(0,this.world.centerX), this.rnd.integerInRange(0,this.world.centerY), 'enemy');
         //this.enemy.physicsBodyType = Phaser.Physics.ARCADE;
         this.physics.enable(this.enemy, Phaser.Physics.ARCADE);
-        this.enemy.enable = true;
+        //this.enemy.enable = true;
         //this.enemy.allowRotation = false;
         this.enemy.anchor.setTo(0.5, 0.5);
         this.enemy.kill();
@@ -679,9 +679,11 @@ SpaceRocks.Game.prototype = {
             }
             
             if (this.enemy.exists == false && this.enemyTimer < this.time.now) {
-                console.log("need to rebuild enemy");
-                this.rebuildEnemy();
-                this.enemyTimer = null;
+                if (this.enemyTimer != null) {
+                    console.log("need to rebuild enemy");
+                    this.rebuildEnemy();
+                    this.enemyTimer = null;
+                }
             }
             
             if (this.enemy.exists == true && this.enemyShotTimer < this.time.now) {
