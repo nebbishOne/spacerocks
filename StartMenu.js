@@ -17,8 +17,8 @@ SpaceRocks.StartMenu.prototype = {
 		this.startBG.width = this.world.width; 
 		this.startBG.inputEnabled = true;
 		this.startBG.events.onInputDown.addOnce(this.startGame, this);
-		this.instr = 'Use Space to fire and Alt for Hyperspace';
-		this.instructions = this.add.bitmapText(this.world.centerX-255, this.world.centerY+50, 'eightbitwonder', this.instr, 14);
+		this.instr = 'Press Space to fire     Press Alt for Hyperspace     Press P to pause and unpause.';
+		this.instructions = this.add.bitmapText(this.world.centerX-465, this.world.centerY+50, 'eightbitwonder', this.instr, 14);
 		this.startPrompt = this.add.bitmapText(this.world.centerX-220, this.world.centerY+100, 'eightbitwonder', 'Press Space to Start', 24);
 	},
 
