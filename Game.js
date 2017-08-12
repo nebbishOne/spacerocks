@@ -42,6 +42,7 @@ SpaceRocks.Game = function(game) {
     this.playerRespawnTime;
     this.asteroidTimer;
     this.haveRocks;
+    this.pauseKey;
 };
 
 SpaceRocks.Game.prototype = {
@@ -67,6 +68,8 @@ SpaceRocks.Game.prototype = {
         this.hyperdelay = 5000;
         this.canhyperspace = true;
         this.haveRocks = false;
+        this.pauseKey =  this.input.keyboard.addKey(Phaser.KeyCode.P);
+        this.pauseKey.onDown.add(this.togglePause, this);
         
         this.beep =  this.add.audio('beep');
         this.boom1 = this.add.audio('boom1');
@@ -649,6 +652,11 @@ SpaceRocks.Game.prototype = {
     quitGame: function(pointer) {
         this.state.start('HighScores');
     },    
+
+    togglePause: function() {
+        this.physics.arcade.isPaused = (this.physics.arcade.isPaused) ? false : true;
+        console.log('toggled pause - ' + this.physics.arcade.isPaused);
+    },
     
     doNothing: function() {
         //really.
