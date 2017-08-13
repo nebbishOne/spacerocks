@@ -21,21 +21,21 @@ SpaceRocks.HighScores.prototype = {
         var phs = localStorage.getItem('highScore') ? localStorage.getItem('highScore') : '0';
         var ns = localStorage.getItem('newestScore') ? localStorage.getItem('newestScore') : 0;
         
-    		this.highscoretitle = this.add.bitmapText((this.world.width/2)-200,(this.world.height/2)-300, 'eightbitwonder', 'Previous High Score: ' + phs, 20);
-    		this.yourscoretitle = this.add.bitmapText((this.world.width/2)-200,(this.world.height/2)-250, 'eightbitwonder', 'Your Score: ' + ns, 20);
+    		this.highscoretitle = this.add.bitmapText((this.world.width/2)-200,(this.world.height/2)-200, 'eightbitwonder', 'Previous High Score: ' + phs, 20);
+    		this.yourscoretitle = this.add.bitmapText((this.world.width/2)-200,(this.world.height/2)-160, 'eightbitwonder', 'Your Score: ' + ns, 20);
         phs = parseInt(phs, 10);
         ns = parseInt(ns, 10);
         if (ns > phs) {
                 console.log('HighScores: replacing high score with newest score');
                 localStorage.setItem('highScore', ns);
-                this.newhighmessage = this.add.bitmapText((this.world.width/2)-200,(this.world.height/2)-200, 'eightbitwonder', 'You got the new high score!!!', 15);
+                this.newhighmessage = this.add.bitmapText((this.world.width/2)-200,(this.world.height/2)-120, 'eightbitwonder', 'You got the new high score!!!', 15);
     		} else { 
             //alert('ns ' + ns + ' is less than phs ' + phs + ' so not a new high score');
-            this.newhighmessage = this.add.bitmapText((this.world.width/2)-200,(this.world.height/2)-200, 'eightbitwonder', 'Try again...', 15);
+            this.newhighmessage = this.add.bitmapText((this.world.width/2)-200,(this.world.height/2)-120, 'eightbitwonder', 'Try again...', 15);
     		}
       }
   		
-  		this.overmessage = this.add.bitmapText((this.world.width/2)-200,(this.world.height/2)-150, 'eightbitwonder', 'Press Space to Play Again', 20);
+  		this.overmessage = this.add.bitmapText((this.world.width/2)-200,(this.world.height/2)-80, 'eightbitwonder', 'Press Space to Play Again', 20);
           this.overmessage.align = 'center';
           this.overmessage.inputEnabled = true;
           this.overmessage.events.onInputDown.addOnce(this.quitGame, this);
