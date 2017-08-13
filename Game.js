@@ -143,8 +143,7 @@ SpaceRocks.Game.prototype = {
     fireShot: function() {
         if (this.gameover == false) {
             if (this.ship.exists) {
-                if (this.time.now > this.nextfire && this.shots.countDead() > 0)
-                {
+                if (this.time.now > this.nextfire && this.shots.countDead() > 0) {
                     this.nextfire = this.time.now + this.firerate;
             
                     var shot = this.shots.getFirstDead();
