@@ -343,7 +343,6 @@ SpaceRocks.Game.prototype = {
                 this.burst.emitY = s.y;
                 this.burst.start(true, 800, null, 30); //(explode, lifespan, frequency, quantity)
                 
-                this.canhyperspace = true;
                 s.kill();
                 this.lives--;
                 if (this.lives < 1) {
@@ -351,6 +350,7 @@ SpaceRocks.Game.prototype = {
                 } else { 
                     this.lifemessage.setText('Lives: ' + this.lives);
                     this.timer = this.time.now + this.playerRespawnTime;
+                    this.canhyperspace = true;
                 }
             }
         }
@@ -654,6 +654,13 @@ SpaceRocks.Game.prototype = {
 
     togglePause: function() {
         this.physics.arcade.isPaused = (this.physics.arcade.isPaused) ? false : true;
+        if (this.physics.arcade.isPaused === true) {
+            this.bweeoop.stop();
+        } else {
+            if (this.enemy.exists === true) {
+                this.bweeoop.loopFull();
+            }
+        }
         console.log('toggled pause - ' + this.physics.arcade.isPaused);
     },
     
